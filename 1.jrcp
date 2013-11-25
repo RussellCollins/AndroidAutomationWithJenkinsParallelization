@@ -1,0 +1,377 @@
+<recipe plugin="recipe@1.1">
+  <id>1</id>
+  <version>1.0</version>
+  <displayName>TestAllTheThings</displayName>
+  <description>Build and test config templates for testing all the things with Android JUnit. This is to accompany the following blog post: http://everybodytests.blogspot.com/2013/11/enterprise-scale-live-device-test.html</description>
+  <ingredients>
+    <job>
+      <name>AndroidCoverageBuildTemplate</name>
+      <description>Upstream build job encompassing building for emma code coverage, inserting AndroidManifest.xml permissions on the fly, and other chewy goodness.</description>
+      <definition>
+        <project>
+          <actions/>
+          <description>This is a template build to produce an Android project with code coverage enabled and Lint reporting. To best use the template, you must add the following configurations:&#xd;
+&lt;br&gt;1) You must specify your Source Code Management option (e.g. Git)&#xd;
+&lt;br&gt;2) You must specify your Build Trigger option (e.g. Build when a change is pushed to GitHub). Make sure you have enabled post-commit hook URLs on your SCM repository.&#xd;
+&lt;br&gt;3) You must specify the path to your Android SDK directory under the Default Value for ANDROID_SDK_DIR&#xd;
+&lt;br&gt;4) You must specify the path to your main app relative to your workspace under the Default Value for MAIN_APP_PATH_IN_WORKSPACE&#xd;
+&lt;br&gt;5) You must specify the path to your test app relative to your workspace under the Default Value for TEST_APP_PATH_IN_WORKSPACE&#xd;
+&lt;br&gt;6) You must specify the path to your main app relative to your test app under the Default Value for RELATIVE_PATH_FROM_TEST_APP_TO_MAIN_APP&#xd;
+&lt;br&gt;&#xd;
+&lt;br&gt;These parameters are a convenience to generalize the config for commandline builds according to the &lt;a href=&quot;http://developer.android.com/tools/building/building-cmdline.html&quot;&gt;Android developer documentation&lt;/a&gt;&#xd;
+&lt;br&gt;&#xd;
+&lt;br&gt;NOTE: this config &lt;b&gt;only applies to an environment running Mac OSX Mountain Lion&lt;/b&gt;. There may be subtle differences between sed and REGEX in your shell environment. If you find that it is not working for you, please consult the documentation. Emma code coverage report generation will not work without the disk write permission in your app which we are inserting at build time here.&#xd;
+&lt;br&gt;NOTE: using the build.xml for the test job alone is sufficient to build BOTH the main project and test project since Ant knows about the dependency linking the test project to the main project.</description>
+          <logRotator class="hudson.tasks.LogRotator">
+            <daysToKeep>-1</daysToKeep>
+            <numToKeep>20</numToKeep>
+            <artifactDaysToKeep>-1</artifactDaysToKeep>
+            <artifactNumToKeep>-1</artifactNumToKeep>
+          </logRotator>
+          <keepDependencies>false</keepDependencies>
+          <properties>
+            <hudson.model.ParametersDefinitionProperty>
+              <parameterDefinitions>
+                <hudson.model.StringParameterDefinition>
+                  <name>ANDROID_SDK_DIR</name>
+                  <description>This is the path on this system to the installation directory for your Android SDK.</description>
+                  <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                  <name>MAIN_APP_PATH_IN_WORKSPACE</name>
+                  <description>This is the path RELATIVE TO THE WORKSPACE for the AndroidManifest.xml of your main app that this job will build. You need to supply this in order to run the command &quot;android update project&quot;. 
+
+See the documentation for the android command by opening a terminal and entering &quot;ANDROID_SDK_DIR/tools/android -help&quot; where ANDROID_SDK_DIR is the path to your Android SDK&apos;s install folder.</description>
+                  <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                  <name>TEST_APP_PATH_IN_WORKSPACE</name>
+                  <description>This is the path RELATIVE TO THE WORKSPACE for the AndroidManifest.xml of your test app that this job will build. You need to supply this in order to run the command &quot;android update test-project&quot;. 
+
+See the documentation for the android command by opening a terminal and entering &quot;ANDROID_SDK_DIR/tools/android -help&quot; where ANDROID_SDK_DIR is the path to your Android SDK&apos;s install folder.</description>
+                  <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                  <name>RELATIVE_PATH_FROM_TEST_APP_TO_MAIN_APP</name>
+                  <description>This is the path RELATIVE TO THE WORKSPACE for the AndroidManifest.xml of your test app that this job will build. You need to supply this in order to run the command &quot;android update test-project&quot;. 
+
+See the documentation for the android command by opening a terminal and entering &quot;ANDROID_SDK_DIR/tools/android -help&quot; where ANDROID_SDK_DIR is the path to your Android SDK&apos;s install folder.</description>
+                  <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+              </parameterDefinitions>
+            </hudson.model.ParametersDefinitionProperty>
+          </properties>
+          <scm class="hudson.plugins.git.GitSCM" plugin="git@1.3.0">
+            <configVersion>2</configVersion>
+            <userRemoteConfigs>
+              <hudson.plugins.git.UserRemoteConfig>
+                <name></name>
+                <refspec></refspec>
+                <url>git://REPLACETHISWITHYOURREPOSITORYURL.COM/PATH/TO_YOUR_REPO.git</url>
+              </hudson.plugins.git.UserRemoteConfig>
+            </userRemoteConfigs>
+            <branches>
+              <hudson.plugins.git.BranchSpec>
+                <name>master</name>
+              </hudson.plugins.git.BranchSpec>
+            </branches>
+            <disableSubmodules>false</disableSubmodules>
+            <recursiveSubmodules>false</recursiveSubmodules>
+            <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+            <authorOrCommitter>false</authorOrCommitter>
+            <clean>false</clean>
+            <wipeOutWorkspace>false</wipeOutWorkspace>
+            <pruneBranches>false</pruneBranches>
+            <remotePoll>false</remotePoll>
+            <ignoreNotifyCommit>false</ignoreNotifyCommit>
+            <useShallowClone>false</useShallowClone>
+            <buildChooser class="hudson.plugins.git.util.DefaultBuildChooser"/>
+            <gitTool>Default</gitTool>
+            <submoduleCfg class="list"/>
+            <relativeTargetDir></relativeTargetDir>
+            <reference></reference>
+            <excludedRegions></excludedRegions>
+            <excludedUsers></excludedUsers>
+            <gitConfigName></gitConfigName>
+            <gitConfigEmail></gitConfigEmail>
+            <skipTag>false</skipTag>
+            <includedRegions></includedRegions>
+            <scmName></scmName>
+          </scm>
+          <canRoam>true</canRoam>
+          <disabled>false</disabled>
+          <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+          <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+          <triggers>
+            <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.5">
+              <spec></spec>
+            </com.cloudbees.jenkins.GitHubPushTrigger>
+          </triggers>
+          <concurrentBuild>false</concurrentBuild>
+          <builders>
+            <hudson.tasks.Shell>
+              <command>######
+# These build artifacts are used for carrying build details downstream
+# to later steps in this job and also to the subsequent test job. It is
+# useful to tag builds clearly for tracking and debugging purposes.
+######
+
+# tag this build with its details
+mkdir -p .build_extras
+echo &quot;$JOB_NAME.$BUILD_NUMBER&quot; &gt; .build_extras/test_id.txt
+echo &quot;$JOB_NAME&quot; &gt; .build_extras/job_name.txt
+echo &quot;$BUILD_NUMBER&quot; &gt; .build_extras/build_number.txt
+echo &quot;$GIT_COMMIT&quot; &gt; .build_extras/git_commit.txt</command>
+            </hudson.tasks.Shell>
+            <hudson.tasks.Shell>
+              <command>######
+# This updates the local environment files needed by Ant to properly build Android projects.
+######
+
+###### Update main project ######
+$ANDROID_SDK_DIR/tools/android update project -p $MAIN_APP_PATH_IN_WORKSPACE
+
+## Note - If you have any included library projects under your main project, 
+## update the /library-projects path appropriately below and uncomment the following loop
+
+###### Update all library projects ######
+for LIB in `ls $MAIN_APP_PATH_IN_WORKSPACE/library-projects`; do
+ if [ -d &quot;$MAIN_APP_PATH_IN_WORKSPACE/library-projects/$LIB&quot; ]; then
+  echo Updating $LIB
+  $ANDROID_SDK_DIR/tools/android update lib-project -p $MAIN_APP_PATH_IN_WORKSPACE/library-projects/$LIB
+ fi
+done
+
+###### Update test project ######
+$ANDROID_SDK_DIR/tools/android update test-project -p $TEST_APP_PATH_IN_WORKSPACE -m $RELATIVE_PATH_FROM_TEST_APP_TO_MAIN_APP</command>
+            </hudson.tasks.Shell>
+            <hudson.tasks.Shell>
+              <command>######
+# In order to capture code coverage output on a live device instead of an emulator,
+# the application needs to be able to write that output to the file system. Here
+# it is assumed your app does not already use this permission so it is added on the
+# fly before the app is built without needing to make the change in code in your SCM.
+######
+
+# Add Uses Permissions tag to include &quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;
+cd $MAIN_APP_PATH_IN_WORKSPACE
+pwd
+sed -i .bak &apos;/android\.permission\.INTERNET/ a\
+\    &lt;uses-permission android:name=&quot;&apos;android.permission.WRITE_EXTERNAL_STORAGE&apos;&quot; \/\&gt;
+&apos; ./AndroidManifest.xml
+</command>
+            </hudson.tasks.Shell>
+            <hudson.tasks.Shell>
+              <command>######
+# Because the build details were captured above and stored in files in the workspace,
+# they can be applied to the AndroidManifest to make the build tag visible in the app&apos;s
+# Version Name. This is merely for convenience and can be removed if desired.
+######
+
+#Create VERSION_NAME tag based on date, commit prefix, and build number
+DATE=`date +%d%b%y`
+echo $GIT_COMMIT | sed &apos;s/\(......\).*/\1/&apos; &gt; .build_extras/commit_prefix.txt
+COMMIT_PREFIX=`cat .build_extras/commit_prefix.txt`
+VERSION_NAME=$BUILD_NUMBER.$DATE.$COMMIT_PREFIX
+
+# Apply to Main project
+sed -i &apos;&apos; &apos;s,android:versionName=\&quot;[0-9]\.[0-9]*\&quot;,android:versionName=\&quot;&apos;$VERSION_NAME&apos;\&quot;,&apos; $MAIN_APP_PATH_IN_WORKSPACE/AndroidManifest.xml</command>
+            </hudson.tasks.Shell>
+            <hudson.tasks.Ant plugin="ant@1.2">
+              <targets>clean</targets>
+              <buildFile>$TEST_APP_PATH_IN_WORKSPACE/build.xml</buildFile>
+            </hudson.tasks.Ant>
+            <hudson.tasks.Ant plugin="ant@1.2">
+              <targets>emma debug -verbose</targets>
+              <buildFile>$TEST_APP_PATH_IN_WORKSPACE/build.xml</buildFile>
+            </hudson.tasks.Ant>
+            <hudson.tasks.Shell>
+              <command>#Generate LINT reports
+$ANDROID_SDK_DIR/tools/lint . --xml LintResults.xml
+$ANDROID_SDK_DIR/tools/lint . --html LintResults.html</command>
+            </hudson.tasks.Shell>
+          </builders>
+          <publishers>
+            <org.jenkinsci.plugins.android__lint.LintPublisher plugin="android-lint@2.1">
+              <healthy></healthy>
+              <unHealthy></unHealthy>
+              <thresholdLimit>low</thresholdLimit>
+              <pluginName>[android-lint] </pluginName>
+              <defaultEncoding></defaultEncoding>
+              <canRunOnFailed>false</canRunOnFailed>
+              <useStableBuildAsReference>false</useStableBuildAsReference>
+              <useDeltaValues>false</useDeltaValues>
+              <thresholds plugin="analysis-core@1.52">
+                <unstableTotalAll></unstableTotalAll>
+                <unstableTotalHigh></unstableTotalHigh>
+                <unstableTotalNormal></unstableTotalNormal>
+                <unstableTotalLow></unstableTotalLow>
+                <failedTotalAll></failedTotalAll>
+                <failedTotalHigh></failedTotalHigh>
+                <failedTotalNormal></failedTotalNormal>
+                <failedTotalLow></failedTotalLow>
+              </thresholds>
+              <shouldDetectModules>false</shouldDetectModules>
+              <dontComputeNew>true</dontComputeNew>
+              <doNotResolveRelativePaths>false</doNotResolveRelativePaths>
+              <pattern>**/*LintResults.xml</pattern>
+            </org.jenkinsci.plugins.android__lint.LintPublisher>
+            <hudson.tasks.ArtifactArchiver>
+              <artifacts>**/*.apk,.build_extras/*,LintResults.html, LintResults.xml,  **/*coverage.em</artifacts>
+              <excludes>Tests.apk</excludes>
+              <latestOnly>false</latestOnly>
+              <allowEmptyArchive>false</allowEmptyArchive>
+            </hudson.tasks.ArtifactArchiver>
+            <hudson.tasks.BuildTrigger>
+              <childProjects>AndroidCoverageTestTemplate</childProjects>
+              <threshold>
+                <name>SUCCESS</name>
+                <ordinal>0</ordinal>
+                <color>BLUE</color>
+              </threshold>
+            </hudson.tasks.BuildTrigger>
+          </publishers>
+          <buildWrappers/>
+        </project>
+      </definition>
+    </job>
+    <job>
+      <name>AndroidCoverageTestTemplate</name>
+      <description>Downstream test job consuming artifacts from AndroidCoverageBuildTemplate which executes on device on a slave node. This has a hard dependency on the test_runner_script.sh which is not included in these configs.</description>
+      <definition>
+        <project>
+          <actions/>
+          <description>This is a template build to produce an Android project with code coverage enabled and Lint reporting. To best use the template, you must add the following configurations:&#xd;
+&lt;br&gt;1) You must specify the PARENT_PROJECT parameter with the correct name of the job as it is provided in the upstream job.&#xd;
+&lt;br&gt;2) You must specify the PROJECT_APK parameter which is the *-instrumented.apk product from the upstream job.&#xd;
+&lt;br&gt;3) You must specify the TEST_APK parameter which is the *Test-debug.apk product from the upstream job.&#xd;
+&lt;br&gt;4) You must specify the NODE_HOST_TEST_DIR which is the shared directory on the system to which your test devices are connected and in which the test runner script is deployed.&#xd;
+&lt;br&gt;5) COVERAGE_ENABLED has a suitable default specified. Setting this to false would undermine the purpose of the upstream build being configured as it is. This parameter is required by the test runner script.&#xd;
+&lt;br&gt;6) JUNIT_TEST_SUITE has a suitable default specified. Customize this to fit any desired suite your project contains. This parameter is required by the test runner script.&#xd;
+&lt;br&gt;7) JUNIT_TEST_RUNNER has a third-party test runner defined which provides XML output. If you have not included that in your test project, the field&apos;s description contains the SDK-provided default for your reference. This parameter is required by the test runner script.&#xd;
+&lt;br&gt;&#xd;
+&lt;br&gt;These parameters are a convenience to generalize the config for commandline use according to the &lt;a href=&quot;http://developer.android.com/tools/building/building-cmdline.html&quot;&gt;Android developer documentation&lt;/a&gt;&#xd;
+&lt;br&gt;&#xd;
+&lt;br&gt;NOTE: this config &lt;b&gt;only applies to an environment running Mac OSX Mountain Lion&lt;/b&gt;. There may be subtle differences between sed and REGEX in your shell environment.</description>
+          <logRotator class="hudson.tasks.LogRotator">
+            <daysToKeep>-1</daysToKeep>
+            <numToKeep>20</numToKeep>
+            <artifactDaysToKeep>-1</artifactDaysToKeep>
+            <artifactNumToKeep>-1</artifactNumToKeep>
+          </logRotator>
+          <keepDependencies>false</keepDependencies>
+          <properties>
+            <hudson.model.ParametersDefinitionProperty>
+              <parameterDefinitions>
+                <hudson.model.StringParameterDefinition>
+                  <name>PARENT_PROJECT</name>
+                  <description>The Jenkins project name of the parent project. This string is used to determine the path of the parent&apos;s directory.</description>
+                  <defaultValue>AndroidCoverageBuildTemplate</defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                  <name>PROJECT_APK</name>
+                  <description>The full path within the workspace to the *-instrumented.apk file generated by the upstream job. </description>
+                  <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                  <name>TEST_APK</name>
+                  <description>The full path within the workspace to the *Test-debug.apk file generated by the upstream job. </description>
+                  <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                  <name>NODE_HOST_TEST_DIR</name>
+                  <description>This is the full filesystem path to the directory on the slave node host computer which contains the test runner script and will be used to contain directories for artifacts and output from successive test runs.</description>
+                  <defaultValue></defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                  <name>COVERAGE_ENABLED</name>
+                  <description>This tells the test runner script to enable capturing of code coverage output. This is set to true because the upstream job is specifically configured to enable coverage on live devices.</description>
+                  <defaultValue>true</defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                  <name>JUNIT_TEST_SUITE</name>
+                  <description>&quot;NOSUITEPROVIDED&quot; is coded into the test runner script that is in the NODE_HOST_TEST_DIR on the system to which the test devices are connected. This is the default value it expects in order to run all tests. If your project wants or needs to use a test suite, replace this variable with the suite that you want this job to execute instead.</description>
+                  <defaultValue>NOSUITEPROVIDED</defaultValue>
+                </hudson.model.StringParameterDefinition>
+                <hudson.model.StringParameterDefinition>
+                  <name>JUNIT_TEST_RUNNER</name>
+                  <description>This test runner is not provided in the Android SDK but it (or one like it) is required if you want XML output from your tests. Please visit https://code.google.com/p/the-missing-android-xml-junit-test-runner/ for more information.
+
+If you do not desire XML output, or if you want to just use the standard default test runner, change this parameter to the SDK-provided Instrumentation test runner: &quot;android.test.InstrumentationTestRunner&quot;. Please visit http://developer.android.com/reference/android/test/InstrumentationTestRunner.html for more information.</description>
+                  <defaultValue>pl.polidea.instrumentation.PolideaInstrumentationTestRunner</defaultValue>
+                </hudson.model.StringParameterDefinition>
+              </parameterDefinitions>
+            </hudson.model.ParametersDefinitionProperty>
+          </properties>
+          <scm class="hudson.scm.NullSCM"/>
+          <assignedNode>###REPLACE THIS WITH THE NAME OF YOUR DEVICE SLAVE NODE. SURROUND WITH QUOTES FOR NAMES WITH SPACES###</assignedNode>
+          <canRoam>false</canRoam>
+          <disabled>false</disabled>
+          <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+          <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+          <triggers/>
+          <concurrentBuild>false</concurrentBuild>
+          <builders>
+            <hudson.plugins.copyartifact.CopyArtifact plugin="copyartifact@1.26">
+              <project>$PARENT_PROJECT</project>
+              <filter>**/*-debug.apk, **/.build_extras/*, **/*-instrumented.apk, **/*.em</filter>
+              <target>.</target>
+              <selector class="hudson.plugins.copyartifact.TriggeredBuildSelector"/>
+              <flatten>true</flatten>
+            </hudson.plugins.copyartifact.CopyArtifact>
+            <hudson.tasks.Shell>
+              <command># copy binaries to local archive folder inside the $NODE_HOST_TEST_DIR
+
+TEST_ID=`cat test_id.txt`
+mkdir -p $NODE_HOST_TEST_DIR/$TEST_ID
+cp $PROJECT_APK $NODE_HOST_TEST_DIR/$TEST_ID/$PROJECT_APK
+cp $TEST_APK $NODE_HOST_TEST_DIR/$TEST_ID/$TEST_APK
+cp coverage.em $NODE_HOST_TEST_DIR/$TEST_ID/coverage.em</command>
+            </hudson.tasks.Shell>
+            <hudson.tasks.Shell>
+              <command># run tests on device using the test runner which captures all output
+
+TEST_ID=`cat test_id.txt`
+cd $NODE_HOST_TEST_DIR
+./test_runner_script.sh $TEST_ID $PROJECT_APK $TEST_APK $DEVICE_SERIAL $JUNIT_TEST_SUITE $JUNIT_TEST_RUNNER $COVERAGE_ENABLED</command>
+            </hudson.tasks.Shell>
+            <hudson.tasks.Shell>
+              <command># copy results back
+
+TEST_ID=`cat test_id.txt`
+cp -r $NODE_HOST_TEST_DIR/$TEST_ID/results/$DEVICE_SERIAL .</command>
+            </hudson.tasks.Shell>
+          </builders>
+          <publishers>
+            <hudson.tasks.ArtifactArchiver>
+              <artifacts>**/logcat.txt, **/*-TEST.xml,**/*.jpg, **/*coverage.ec, coverage/, **/*coverage.xml, **/*.apk</artifacts>
+              <latestOnly>false</latestOnly>
+              <allowEmptyArchive>false</allowEmptyArchive>
+            </hudson.tasks.ArtifactArchiver>
+            <hudson.tasks.junit.JUnitResultArchiver>
+              <testResults>**/*-TEST.xml</testResults>
+              <keepLongStdio>false</keepLongStdio>
+              <testDataPublishers/>
+            </hudson.tasks.junit.JUnitResultArchiver>
+            <hudson.plugins.emma.EmmaPublisher plugin="emma@1.29">
+              <includes>./0149BD7D06014019/coverage.xml</includes>
+              <healthReports>
+                <minClass>0</minClass>
+                <maxClass>100</maxClass>
+                <minMethod>0</minMethod>
+                <maxMethod>70</maxMethod>
+                <minBlock>0</minBlock>
+                <maxBlock>80</maxBlock>
+                <minLine>0</minLine>
+                <maxLine>80</maxLine>
+                <minCondition>0</minCondition>
+                <maxCondition>80</maxCondition>
+              </healthReports>
+            </hudson.plugins.emma.EmmaPublisher>
+          </publishers>
+          <buildWrappers/>
+        </project>
+      </definition>
+    </job>
+  </ingredients>
+</recipe>
